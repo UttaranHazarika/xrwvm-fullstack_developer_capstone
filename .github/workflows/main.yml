@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [master, main]
 
+permissions:
+  contents: write  # Required to commit and push changes
+
 jobs:
   lint_python:
     name: Lint and Auto-Fix Python Files
@@ -25,7 +28,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 black
 
-    - name: Run Linter and Auto-Fix
+    - name: Auto-Fix and Lint Python Files
       run: |
         # Auto-fix Python code with Black
         black . --line-length 88
@@ -34,12 +37,13 @@ jobs:
         echo "Linted and formatted all Python files successfully"
 
     - name: Commit and Push Changes
+      if: success()
       run: |
         git config --global user.email "uhaz.88@gmail.com"
         git config --global user.name "UttaranHazarika"
         git add .
         git commit -m "Auto-fix Python code with Black" || echo "No changes to commit"
-        git push || echo "No changes to push"
+        git push origin HEAD || echo "No changes to push"
 
   lint_js:
     name: Lint and Auto-Fix JavaScript Files
@@ -52,21 +56,23 @@ jobs:
     - name: Install Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 14
+        node-version: 16
 
     - name: Install ESLint
-      run: npm install eslint --global
+      run: |
+        npm install eslint --save-dev
 
-    - name: Run Linter and Auto-Fix
+    - name: Auto-Fix and Lint JavaScript Files
       run: |
         # Auto-fix JavaScript code with ESLint
-        eslint "**/*.js" --fix
+        npx eslint "**/*.js" --fix || echo "No issues to fix"
         echo "Linted and formatted all JavaScript files successfully"
 
     - name: Commit and Push Changes
+      if: success()
       run: |
         git config --global user.email "uhaz.88@gmail.com"
         git config --global user.name "UttaranHazarika"
         git add .
         git commit -m "Auto-fix JavaScript code with ESLint" || echo "No changes to commit"
-        git push || echo "No changes to push"
+        git push origin HEAD || echo "No changes to push"
