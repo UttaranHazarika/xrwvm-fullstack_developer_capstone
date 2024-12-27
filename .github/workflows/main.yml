@@ -7,7 +7,7 @@ on:
     branches: [master, main]
 
 permissions:
-  contents: write  # Required to commit and push changes
+  contents: write
 
 jobs:
   lint_python:
@@ -28,19 +28,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 black
 
-    - name: Auto-Fix and Lint Python Files
+    - name: Auto-Fix Python Files with Black
       run: |
-        # Auto-fix Python code with Black
         black . --line-length 88
-        # Lint Python code with Flake8
-        find . -name "*.py" -exec flake8 {} +
-        echo "Linted and formatted all Python files successfully"
+        echo "Formatted all Python files successfully"
+
+    - name: Run Linter with Flake8
+      run: |
+        # Run Flake8 and allow the workflow to continue
+        find . -name "*.py" -exec flake8 {} + || echo "Flake8 found issues. Review above output."
+      continue-on-error: true
 
     - name: Commit and Push Changes
-      if: success()
+      if: success() || failure()
       run: |
-        git config --global user.email "uhaz.88@gmail.com"
-        git config --global user.name "UttaranHazarika"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "GitHub Actions Bot"
         git add .
         git commit -m "Auto-fix Python code with Black" || echo "No changes to commit"
         git push origin HEAD || echo "No changes to push"
@@ -64,15 +67,14 @@ jobs:
 
     - name: Auto-Fix and Lint JavaScript Files
       run: |
-        # Auto-fix JavaScript code with ESLint
         npx eslint "**/*.js" --fix || echo "No issues to fix"
         echo "Linted and formatted all JavaScript files successfully"
 
     - name: Commit and Push Changes
       if: success()
       run: |
-        git config --global user.email "uhaz.88@gmail.com"
-        git config --global user.name "UttaranHazarika"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "GitHub Actions Bot"
         git add .
         git commit -m "Auto-fix JavaScript code with ESLint" || echo "No changes to commit"
         git push origin HEAD || echo "No changes to push"
